@@ -10,16 +10,10 @@ const staticRoutes = require("./routes/staticRoutes");
 const galleryRoutes = require("./routes/galleryRoutes");
 const resultRoutes = require("./routes/resultRoutes");
 
-require("./models/UserModel");
-require("./models/ResultModel");
-require("./models/NewsModel");
-require("./models/GalleryModel");
-require("./models/StaticModel");
-
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGO_URI);
-    console.log(`MongoDB Connected: ${conn.connection.host}`);
+    await mongoose.connect(process.env.MONGO_URI);
+    console.log(`MongoDB Connected`);
   } catch (error) {
     console.error(`Error: ${error.message}`);
     process.exit(1);
