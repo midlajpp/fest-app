@@ -9,7 +9,9 @@ const { notFound, errorHandler } = require("./middleware/errorMiddleware");
 const staticRoutes = require("./routes/staticRoutes");
 const galleryRoutes = require("./routes/galleryRoutes");
 const resultRoutes = require("./routes/resultRoutes");
-
+app.get("/", (req, res) => {
+  res.send("Fest Application Backend API Running...");
+});
 const connectDB = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI);
@@ -32,10 +34,6 @@ app.use("/api/results", resultRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
-
-app.get("/", (req, res) => {
-  res.send("Fest Application Backend API Running...");
-});
 
 const PORT = process.env.PORT || 5000;
 

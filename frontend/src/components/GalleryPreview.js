@@ -13,7 +13,10 @@ const GalleryPreview = () => {
         const res = await axios.get(
           "http://localhost:5000/api/gallery/preview"
         );
-        setPreviewImages(res.data);
+
+        setPreviewImages(
+          res.data.map((item, index) => ({ ...item, _id: item._id || index }))
+        );
         setLoading(false);
       } catch (err) {
         console.error("Error fetching gallery preview:", err);
@@ -24,28 +27,30 @@ const GalleryPreview = () => {
     fetchImages();
   }, []);
 
-  if (loading)
-    return <div style={styles.loading}>Loading Gallery Preview...</div>;
+  if (loading) return <div style={styles.loading}></div>;
   if (previewImages.length === 0) return null;
 
   return (
     <div style={styles.container}>
       <h2 style={styles.heading}>Fest Highlights</h2>
 
-      {}
       <div style={styles.grid}>
         {previewImages.map((image, index) => (
-          <div key={index} style={styles.imageWrapper}>
+          <div key={image._id || index} style={styles.imageWrapper}>
             <img
               src={image.laptopUrl || image.mobileUrl}
               alt={`Fest Highlight ${index + 1}`}
               style={styles.image}
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src =
+                  "https://via.placeholder.com/600x400/808080/FFFFFF?text=LOAD+ERROR";
+              }}
             />
           </div>
         ))}
       </div>
 
-      {}
       <div style={styles.moreLinkContainer}>
         <Link to="/gallery" style={styles.moreLink}>
           View Full Gallery <FaArrowRight style={{ marginLeft: "8px" }} />

@@ -1,5 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const Gallery = require("../models/GalleryModel");
+const cloudinary = require("../config/cloudinaryConfig");
 const multer = require("multer");
 const path = require("path");
 
@@ -27,18 +28,6 @@ const upload = multer({
       cb(new Error("Only images (jpeg, jpg, png) are allowed!"));
     }
   },
-});
-
-const addGalleryImage = asyncHandler(async (req, res) => {
-  const { laptopUrl, mobileUrl, isPreview } = req.body;
-
-  const galleryImage = await Gallery.create({
-    laptopUrl,
-    mobileUrl,
-    isPreview: isPreview || false,
-  });
-
-  res.status(201).json(galleryImage);
 });
 
 const updateGalleryImage = asyncHandler(async (req, res) => {
@@ -69,6 +58,48 @@ const getPreviewImages = asyncHandler(async (req, res) => {
     .limit(3)
     .sort({ createdAt: -1 });
   res.status(200).json(images);
+});
+
+// newone
+
+const addGalleryImage = asyncHandler(async (req, res) => {
+  if (!req.file) {
+    res.status(400);
+    throw new Error("No image file uploaded.");
+  }
+
+  try {
+    const b64 = Buffer.from(req.file.buffer).toString("base64");
+    let dataURI = "data:" + req.file.mimetype + ";base64," + b64;
+
+    const result = await cloudinary.uploader.upload(dataURI, {
+      folder: "fest-gallery",
+    });
+
+    const uploadedUrl = result.secure_url;
+
+    const laptopUrl = uploadedUrl.replace(
+      "/upload/",
+      "/upload/w_1920,h_640,c_fill/"
+    );
+
+    const mobileUrl = uploadedUrl.replace(
+      "/upload/",
+      "/upload/w_800,h_800,c_fill/"
+    );
+
+    const galleryImage = await Gallery.create({
+      laptopUrl,
+      mobileUrl,
+      isPreview: req.body.isPreview === "true" || false,
+    });
+
+    res.status(201).json(galleryImage);
+  } catch (error) {
+    console.error("Cloudinary upload error:", error);
+    res.status(500);
+    throw new Error("Image upload failed.");
+  }
 });
 
 module.exports = {
